@@ -28,6 +28,7 @@ need to show: GREEDY <= OPT * log n
 import argparse
 import random
 import time
+import os
 
 def approx_msc(U, S):
     '''
@@ -78,18 +79,23 @@ def parse_instance(filepath):
     U = set(range(1, n + 1))
     return U, S
 
-def write_output(instance, method, cutoff, seed, solution):
+def write_output(instance, method, cutoff, solution):
     '''
     input: instance: path to the file containing the dataset
            method: name of the method used to solve the instance
            cutoff: time limit for the algorithm
-           seed: random seed used for the algorithm
            solution: list of sets in the solution
     output: None
     '''
-    base_name = f"{instance} {method} {cutoff} {seed}"
+    # Extract the base name of the instance file (e.g., test1.in)
+    instance_name = instance.split('/')[-1]
+    # Define the output directory and file name
+    output_dir = "../output"
+    base_name = f"{instance_name} {method} {cutoff}"
+    output_path = f"{output_dir}/{base_name}.out"
 
-    with open(f"{base_name}.out", 'w') as f:
+    # Write the output to the specified file
+    with open(output_path, 'w') as f:
         f.write(f"{len(solution)}\n")
         f.write(" ".join(map(str, solution)) + "\n")
 
@@ -102,10 +108,8 @@ def main():
     parser.add_argument('-inst', required=True)
     parser.add_argument('-alg', choices=['Approx'], required=True)
     parser.add_argument('-time', type=int, required=True)
-    parser.add_argument('-seed', type=int, required=False)
     args = parser.parse_args()
 
-    random.seed(args.seed)
 
     U, S = parse_instance(args.inst)
     if args.alg == 'Approx':
@@ -115,7 +119,7 @@ def main():
         if elapsed_time > args.time:
             print(f"Algorithm timed out after {args.time} seconds")
             return
-        write_output(args.inst, args.alg, args.time, args.seed, solution)
+        write_output(args.inst, args.alg, args.time, solution)
 
 if __name__ == "__main__":
     main()
