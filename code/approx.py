@@ -89,10 +89,12 @@ def write_output(instance, method, cutoff, solution):
     '''
     # Extract the base name of the instance file (e.g., test1.in)
     instance_name = instance.split('/')[-1]
+    # Remove the file extension (e.g., test1)
+    instance_name = os.path.splitext(instance_name)[0]
     # Define the output directory and file name
     output_dir = "../output"
-    base_name = f"{instance_name} {method} {cutoff}"
-    output_path = f"{output_dir}/{base_name}.out"
+    base_name = f"{instance_name}_{method}_{cutoff}"
+    output_path = f"{output_dir}/{base_name}.sol"
 
     # Write the output to the specified file
     with open(output_path, 'w') as f:
