@@ -5,8 +5,16 @@ import os
 import math
 import glob
 
+""" Simulated Annealing
+- Uses Approximation Algorithm as the initial solution
 
-#parsing the input file
+- Implements Simulated Annealing with:
+    - A time cutoff (in seconds)
+    - A no-improvement cutoff along with time cutoff
+    - A probabilistic acceptance of worse moves based on a temperature schedule
+    - add, swap, and remove possibilities at each iteration
+    - run for max of 10 minutes per .in file
+"""
 def parse_instance(filepath):
     with open(filepath, 'r') as f:
         lines = f.readlines()
@@ -20,8 +28,6 @@ def parse_instance(filepath):
         raw_indices.append(i)
     U = set(range(1, n + 1))
     return U, S, raw_indices
-
-#approx algo to initialize guess
 def greedy_approx(U, S, raw_indices):
     cover_indices = []
     uncovered = set(U)
@@ -37,18 +43,13 @@ def greedy_approx(U, S, raw_indices):
     original_indices = [raw_indices[i] for i in cover_indices]
     return cover_indices, original_indices
 
-#Return the set of elements covered by the given solution indices
 def get_coverage(solution_indices, S):
     covered = set()
     for i in solution_indices:
         covered.update(S[i])
     return covered
-
-#checks if the solution currently is valid
 def is_valid_solution(solution_indices, S, U):
     return get_coverage(solution_indices, S) == U
-
-#implementing pruning to get rid of redundancies in the set
 def prune_solution(solution_indices, S, U):
     res = solution_indices.copy()
     i = 0
@@ -60,19 +61,6 @@ def prune_solution(solution_indices, S, U):
         else:
             i += 1
     return res
-
-#Simulated annealing main code
-""" Simulated Annealing
-- Uses Approximation Algorithm as the initial solution
-
-- Implements Simulated Annealing with:
-    - A time cutoff (in seconds)
-    - A no-improvement cutoff along with time cutoff
-    - A probabilistic acceptance of worse moves based on a temperature schedule
-    - add, swap, and remove possibilities at each iteration
-    - run for max of 10 minutes per .in file
-    - use "python3 simulatedannealing.py -inst ../data -alg LS1 -time 600 -seed 45" to run
-"""
 def simulated_annealing(U, S, raw_indices, cutoff_time, seed=1, threshold=100, initial_solution=None):
     random.seed(seed)
     start_time = time.time()
@@ -159,10 +147,9 @@ def simulated_annealing(U, S, raw_indices, cutoff_time, seed=1, threshold=100, i
     elapsed = time.time() - start_time
     return best_solution, original_indices, trace, elapsed
 
-#writing .sol and .trace files
 def write_output(instance_path, method, cutoff, original_indices, seed=None, trace=None):
     instance_name = os.path.splitext(os.path.basename(instance_path))[0]
-    output_dir = "../output"
+    output_dir = "output"
     os.makedirs(output_dir, exist_ok=True)
     if method in ["LS1"]:
         base_name = f"{instance_name}_{method}_{cutoff}_{seed}"
@@ -176,7 +163,6 @@ def write_output(instance_path, method, cutoff, original_indices, seed=None, tra
             for timestamp, quality in trace:
                 f.write(f"{timestamp:.2f} {quality}\n")
 
-#main code to run the simulated annealing helper function
 def process_file(file_path, algorithm, cutoff_time, seed):
     U, S, raw_indices = parse_instance(file_path)
     if algorithm == "LS1":
@@ -186,7 +172,6 @@ def process_file(file_path, algorithm, cutoff_time, seed):
             U, S, raw_indices, cutoff_time, seed=seed, initial_solution=initial_solution)
         write_output(file_path, algorithm, cutoff_time, original_indices, seed, trace)
 
-#main function to establish terminal arguments and combining .in files
 def main():
     parser = argparse.ArgumentParser(description="Minimum Set Cover Solver")
     parser.add_argument('-inst', required=True)
