@@ -23,7 +23,7 @@ need to show: GREEDY <= OPT * log n
         10. k = O(OPT*log n)    (since m <= OPT)
     11. k = O(log n)
 
-    example usage of executable: python3 approx.py -inst ../data/small1.in -alg Approx -time 600 -seed 42
+example usage of executable: python3 approx.py -inst ../data/small1.in -alg Approx -time 600
 '''
 import argparse
 import random
@@ -35,13 +35,17 @@ def approx_msc(U, S):
     input: U = {x_1, x_2, ..., x_n}: set of n elements
            S = {S_1, S_2, ..., S_m} where S_i is a subset of U: list of sets
     output: C is a subset of S such that C covers all elements in U: list of sets
+            indices: list of indices of the sets in C
     '''
-    C = []                # initialize the cover as empty
+    selected = []         # list to store the selected sets and their indices
+    S_indices = list(range(len(S)))  # list of indices of the sets in S
     uncovered = set(U)    # all elements in U are initially uncovered
     while uncovered:      # while there are still uncovered elements
         best_subset = max(S, key=lambda s: len(uncovered & s))  # find the subset that covers the most uncovered elements
-        C.append(best_subset)     # add it to the cover
-        uncovered -= best_subset  # remove the covered elements from the uncovered set
+        idx = S.index(best_subset)  # get the index of the best subset
+        selected.append((best_subset, idx))  # add the best subset and its index to the selected list
+        uncovered -= best_subset    # remove the covered elements from the uncovered set
+
 
     # below is optional
     def needs_pruning(s, C):
@@ -51,14 +55,16 @@ def approx_msc(U, S):
         return s <= remaining  # if s is a subset of the remaining sets, it is not necessary
     
     # prune the cover to remove any redundant sets
-    pruned = []
-    for s in C:
-        temp_cover = pruned + [x for x in C if x != s]
-        if not needs_pruning(s, temp_cover):
-            pruned.append(s)
-    C = pruned  # update the cover with the pruned sets
+    # prune the indices of any redundant sets
+    pruned = []                                              # list to store the pruned sets and their indices
+    for subset, idx in selected:                             # iterate over the selected sets
+        temp_cover = [s for s, _ in selected if s != subset] # create a temporary cover without the current subset
+        if not needs_pruning(subset, temp_cover):            # check if the current subset is necessary
+            pruned.append((subset, idx))                     # if it is necessary, add it to the pruned list
 
-    return C   
+    pruned_indices = [idx for _, idx in pruned]              # extract the indices of the pruned sets
+    pruned_sets = [s for s, _ in pruned]                     # extract the pruned sets
+    return pruned_sets, pruned_indices
 
 def parse_instance(filepath):
     '''
@@ -69,14 +75,14 @@ def parse_instance(filepath):
     with open(filepath, 'r') as f:
         lines = f.readlines()
     
-    n, m = map(int, lines[0].split())
+    n, m = map(int, lines[0].split())         # Read the first line to get n and m, n is the number of elements, m is the number of subsets
     S = []
 
-    for line in lines[1:]:
-        parts = list(map(int, line.split()))
-        S_i = set(parts[1:])
-        S.append(S_i)
-    U = set(range(1, n + 1))
+    for line in lines[1:]:                    # Read the next m lines to get the subsets
+        parts = list(map(int, line.split()))  # Each line starts with the size of the subset followed by the elements in the subset
+        S_i = set(parts[1:])                  # The first element is the size of the subset, the rest are the elements in the subset
+        S.append(S_i)                         # Add the subset to the list S
+    U = set(range(1, n + 1))                  # Create the set U with elements from 1 to n
     return U, S
 
 def write_output(instance, method, cutoff, solution):
@@ -84,20 +90,16 @@ def write_output(instance, method, cutoff, solution):
     input: instance: path to the file containing the dataset
            method: name of the method used to solve the instance
            cutoff: time limit for the algorithm
-           solution: list of sets in the solution
+           solution: list of indices in the solution
     output: None
     '''
-    # Extract the base name of the instance file (e.g., test1.in)
-    instance_name = instance.split('/')[-1]
-    # Remove the file extension (e.g., test1)
-    instance_name = os.path.splitext(instance_name)[0]
-    # Define the output directory and file name
-    output_dir = "../output"
+    instance_name = instance.split('/')[-1]               # Extract the base name of the instance file (e.g., test1.in)
+    instance_name = os.path.splitext(instance_name)[0]    # Remove the file extension (e.g., test1)
+    output_dir = "../output"                              # Define the output directory and file name
     base_name = f"{instance_name}_{method}_{cutoff}"
     output_path = f"{output_dir}/{base_name}.sol"
 
-    # Write the output to the specified file
-    with open(output_path, 'w') as f:
+    with open(output_path, 'w') as f:                     # Write the output to the specified file
         f.write(f"{len(solution)}\n")
         f.write(" ".join(map(str, solution)) + "\n")
 
@@ -112,16 +114,15 @@ def main():
     parser.add_argument('-time', type=int, required=True)
     args = parser.parse_args()
 
-
-    U, S = parse_instance(args.inst)
-    if args.alg == 'Approx':
-        start_time = time.time()
-        solution = approx_msc(U, S)
-        elapsed_time = time.time() - start_time
+    U, S = parse_instance(args.inst)              # Parse the instance file to get U and S
+    if args.alg == 'Approx':                      # Check if the algorithm is Approx
+        start_time = time.time()                  # Run the approximation algorithm
+        _, indices = approx_msc(U, S)             # Get the solution and its indices
+        elapsed_time = time.time() - start_time   # Calculate the elapsed time
         if elapsed_time > args.time:
             print(f"Algorithm timed out after {args.time} seconds")
             return
-        write_output(args.inst, args.alg, args.time, solution)
+        write_output(args.inst, args.alg, args.time, indices)
 
 if __name__ == "__main__":
     main()
