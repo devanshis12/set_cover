@@ -4,9 +4,11 @@
 set_cover/
 │
 ├── code/                                  # all algorithms
+│   └── bnb.py            
 │   └── approx.py            
 │   └── hillclimbing.py
 │   └── simulatedannealing.py
+│   └── main.py            
 ├── output/                                # all outputs 
 │   └── small1_LS1_600_42.sol
 │   └── small1_LS1_600_42.trace
