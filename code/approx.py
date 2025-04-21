@@ -124,5 +124,27 @@ def main():
             return
         write_output(args.inst, args.alg, args.time, indices)
 
+'''
+uncomment to run the main script
+def run(instance_path, cutoff=None, seed=None):
+    '''
+    wrapper to run the approximation algorithm (for use with exec script)
+
+    input:
+        instance_path (str): path to input .in file in data folder
+        cutoff (int): cutoff time in seconds (not used here, but included for compatibility)
+        seed (int): random seed (not used in this deterministic algorithm)
+    '''
+    U, S = parse_instance(instance_path)
+    start_time = time.time()
+    _, indices = approx_msc(U, S)
+    elapsed_time = time.time() - start_time
+
+    if cutoff is not None and elapsed_time > cutoff:
+        print(f"Approximation algorithm exceeded cutoff time of {cutoff} seconds.")
+        return
+
+    write_output(instance_path, "Approx", cutoff if cutoff else 0, indices)
+'''
 if __name__ == "__main__":
     main()
