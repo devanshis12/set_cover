@@ -71,7 +71,7 @@ def prune_solution(solution_indices, S, U):
     - A probabilistic acceptance of worse moves based on a temperature schedule
     - add, swap, and remove possibilities at each iteration
     - run for max of 10 minutes per .in file
-    - use "python3 simulatedannealing.py -inst ../data -alg LS1 -time 600 -seed 45" to run
+    - use "python3 simulatedannealing.py -inst ../data -alg LS2 -time 600 -seed 45" to run
 """
 def simulated_annealing(U, S, raw_indices, cutoff_time, seed=1, threshold=100, initial_solution=None):
     random.seed(seed)
@@ -164,13 +164,13 @@ def write_output(instance_path, method, cutoff, original_indices, seed=None, tra
     instance_name = os.path.splitext(os.path.basename(instance_path))[0]
     output_dir = "../output"
     os.makedirs(output_dir, exist_ok=True)
-    if method in ["LS1"]:
+    if method in ["LS2"]:
         base_name = f"{instance_name}_{method}_{cutoff}_{seed}"
     solution_path = os.path.join(output_dir, f"{base_name}.sol")
     with open(solution_path, 'w') as f:
         f.write(f"{len(original_indices)}\n")
         f.write(" ".join(map(str, original_indices)) + "\n")
-    if trace and method in ["LS1"]:
+    if trace and method in ["LS2"]:
         trace_path = os.path.join(output_dir, f"{base_name}.trace")
         with open(trace_path, 'w') as f:
             for timestamp, quality in trace:
@@ -179,7 +179,7 @@ def write_output(instance_path, method, cutoff, original_indices, seed=None, tra
 #main code to run the simulated annealing helper function
 def process_file(file_path, algorithm, cutoff_time, seed):
     U, S, raw_indices = parse_instance(file_path)
-    if algorithm == "LS1":
+    if algorithm == "LS2":
         initial_solution, x = greedy_approx(U, S, raw_indices)
         initial_solution = prune_solution(initial_solution, S, U)
         best_solution, original_indices, trace, nxt = simulated_annealing(
@@ -190,7 +190,7 @@ def process_file(file_path, algorithm, cutoff_time, seed):
 def main():
     parser = argparse.ArgumentParser(description="Minimum Set Cover Solver")
     parser.add_argument('-inst', required=True)
-    parser.add_argument('-alg', choices=['LS1'], required=True)
+    parser.add_argument('-alg', choices=['LS2'], required=True)
     parser.add_argument('-time', type=int, required=True)
     parser.add_argument('-seed', type=int, default=42)
     args = parser.parse_args()
