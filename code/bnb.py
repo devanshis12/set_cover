@@ -172,5 +172,18 @@ def main():
     if args.alg == 'BnB':
         run_bnb(args.inst, args.time)
 
+def run(instance_path, cutoff, seed=None):
+    """
+    Wrapper function to make Branch and Bound callable from main.py.
+
+    Parameters:
+        instance_path (str): Path to the input .in file from data folder
+        cutoff (int): Time limit in seconds for the algorithm
+        seed (int): Random seed (not used in BnB but accepted for consistency)
+
+    This function prepares the parameters and invokes run_bnb.
+    """
+    run_bnb(instance_path, cutoff)
+
 if __name__ == "__main__":
     main()
