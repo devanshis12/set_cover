@@ -105,6 +105,23 @@ def run_bnb(filepath, cutoff):
 
     # Define the DFS function that updates 'best' in place.
     def dfs(selected, covered, idx):
+        """
+        Recursive Depth-First Search (DFS) function for exploring subset selections in Branch and Bound.
+
+        input:
+            selected: list of indices representing the subsets selected so far
+            covered: set of elements currently covered by selected subsets
+            idx: current index in the subset list to consider
+
+        behavior:
+            - Recursively explores the inclusion or exclusion of each subset.
+            - Updates the best known solution if a complete and better one is found.
+            - Applies pruning using a lower bound heuristic to avoid unnecessary exploration.
+            - Terminates early if time limit (cutoff) is exceeded.
+
+        output: 
+            None. Updates the shared 'best' dictionary and logs progress to the trace file.
+        """
         elapsed = time.time() - start_time
         if elapsed > cutoff:
             return
