@@ -72,7 +72,7 @@ def log_trace(trace_path, timestamp, cost):
     was found, along with the size of that solution. Used for tracking progress during execution.
     """
     with open(trace_path, "a") as f:
-        f.write(f"{timestamp:.2f} {cost + 1}\n")
+        f.write(f"{timestamp:.2f} {cost}\n")
 
 def run_bnb(filepath, cutoff):
     """
@@ -101,7 +101,7 @@ def run_bnb(filepath, cutoff):
         "solution": list(greedy_indices),
         "cost": len(greedy_indices)
     }
-    # log_trace(trace_path, time.time() - start_time, best["cost"])
+    log_trace(trace_path, time.time() - start_time, best["cost"])
 
     # Define the DFS function that updates 'best' in place.
     def dfs(selected, covered, idx):
@@ -113,7 +113,6 @@ def run_bnb(filepath, cutoff):
             if len(selected) < best["cost"]:
                 best["solution"] = list(selected)
                 best["cost"] = len(selected)
-                print("Here: " + str(len(selected)) + " " + str(best["cost"]) + " " + str(timestamp))
                 log_trace(trace_path, elapsed, best["cost"])
             return
 
