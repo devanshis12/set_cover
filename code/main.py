@@ -31,7 +31,7 @@ def main():
     elif args.alg == 'LS1':
         ls1.run(args.inst, args.time, args.seed)
     elif args.alg == 'LS2':
-        ls2.run(args.inst, args.time, args.seed)
+        simulatedannealing.process_file(args.inst, args.alg, args.time, args.seed)
     else:
         print("Unknown algorithm.")
         sys.exit(1)
