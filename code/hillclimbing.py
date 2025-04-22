@@ -7,7 +7,7 @@ The algorithm starts with a greedy approximation solution and iteratively improv
 2. Swapping sets to explore new solution spaces
 
 Usage:
-  python3 hillclimbing.py -inst <filename> -alg LS1 -time <cutoff in seconds> -seed <random seed>
+  python hillclimbing.py -inst <filename> -alg LS1 -time <cutoff in seconds> -seed <random seed>
 
 Arguments:
   -inst: Path to the instance file
@@ -228,6 +228,31 @@ def read_input(filename):
     U = set(range(1, n + 1))
     return U, S, subset_indices
 
+def run(instance, method, cutoff_time, seed=None):
+    """
+    Run the Hill Climbing algorithm with the given parameters
+    
+    :param instance: Path to the input instance file
+    :param method: Algorithm method (LS1 for Hill Climbing)
+    :param cutoff_time: Maximum runtime in seconds
+    :param seed: Random seed for reproducibility
+    :return: Solution and trace
+    """
+    # Read instance
+    U, S, subset_indices = parse_instance(instance)
+    
+    # Run Hill Climbing
+    solution, solution_indices, trace = hill_climbing(
+        U, S, subset_indices, 
+        max_iterations=1000000, 
+        seed=seed,
+        cutoff_time=cutoff_time
+    )
+    
+    # Write output files
+    write_output(instance, method, cutoff_time, seed, solution_indices, trace)
+    
+    return solution_indices, trace
 
 def main():
     parser = argparse.ArgumentParser()
@@ -238,30 +263,10 @@ def main():
     
     args = parser.parse_args()
     
-    # Read the instance
-    U, S, subset_indices = parse_instance(args.inst)
-    
-    # Run the appropriate algorithm
-    if args.alg == 'BnB':
-        # Run branch and bound
-        pass
-    elif args.alg == 'Approx':
-        # Run approximation algorithm
-        solution = approx_msc(U, S)
-        solution_indices = [subset_indices[frozenset(s)] for s in solution]
-        trace = [(0.0, len(solution))]  # Only initial solution
-        write_output(args.inst, args.alg, args.time, None, solution_indices, trace)
-    elif args.alg == 'LS1':
-        # Run first local search (Hill Climbing)
-        solution, solution_indices, trace = hill_climbing(U, S, subset_indices, 
-                                                         max_iterations=1000000,  # Large value, will be limited by time
-                                                         seed=args.seed,
-                                                         cutoff_time=args.time)  # need to add this parameter
-        write_output(args.inst, args.alg, args.time, args.seed, solution_indices, trace)
-    elif args.alg == 'LS2':
-        # Run second local search (e.g., Simulated Annealing)
-        pass
+    if args.alg == 'LS1':
+        run(args.inst, args.alg, args.time, args.seed)
+    else:
+        print(f"Algorithm {args.alg} not implemented yet.")
 
 if __name__ == "__main__":
     main()
-
