@@ -7,7 +7,7 @@ The algorithm starts with a greedy approximation solution and iteratively improv
 2. Swapping sets to explore new solution spaces
 
 Usage:
-  python hillclimbing.py -inst <filename> -alg LS1 -time <cutoff in seconds> -seed <random seed>
+  python3 hillclimbing.py -inst <filename> -alg LS1 -time <cutoff in seconds> -seed <random seed>
 
 Arguments:
   -inst: Path to the instance file
